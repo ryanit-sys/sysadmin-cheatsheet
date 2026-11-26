@@ -18,7 +18,7 @@ Kho tài liệu tra cứu nhanh câu lệnh Linux, System Administration, Networ
 | --- | --- | --- |
 | Search Commands | grep, find, awk, sed, cut, sort, uniq, xargs, journalctl | 30 câu lệnh |
 | Linux | System, process, storage, memory | Kế hoạch |
-| Networking | IP, routing, DNS | Kế hoạch |
+| Networking | Open vSwitch QoS, HTB, ingress policing, kiểm tra và rollback | 10 câu lệnh |
 | Ceph | Cluster, OSD, PG, health | Kế hoạch |
 | Proxmox | VM, cluster, storage, SDN | Kế hoạch |
 | Docker | Container, image, network | Kế hoạch |
@@ -68,7 +68,19 @@ Thêm mục vào mảng `commands` trong `index.html`:
 ["grep", "Tìm lỗi trong log", "grep -in 'error' application.log", "Hiển thị số dòng, không phân biệt hoa thường."]
 ```
 
-Các trường lần lượt là nhóm công cụ, tiêu đề, câu lệnh và mô tả. Các tab dự phòng cần bổ sung dữ liệu và logic hiển thị khi triển khai nội dung mới.
+Các trường lần lượt là nhóm công cụ, tiêu đề, câu lệnh và mô tả. Networking sử dụng mảng `networkingCommands` cùng cấu trúc. Các tab dự phòng cần bổ sung dữ liệu và logic hiển thị khi triển khai nội dung mới.
+
+## Open vSwitch Rate Limit
+
+Tab **Networking → Open vSwitch** có 10 mục cấu hình, kiểm tra và rollback.
+
+- Egress: Linux HTB QoS/Queue, 40 Mbps = 40000000 bit/s.
+- Ingress: policing, 40 Mbps = 40000 kbit/s; burst ví dụ 4000 kbit. Policing drop gói vượt ngưỡng, khác với shaping.
+- Chiều traffic được xác định theo port/interface OVS, không mặc định theo chiều upload/download của VM.
+- Kiểm tra bằng ovs-vsctl, ovs-appctl, tc và iperf3 hai chiều.
+- Port fwln9990o0 là ví dụ; thay bằng port thực tế. Kiểm tra QoS hiện hữu trước khi ghi đè.
+- Rollback: tắt policing, lưu UUID, clear Port qos, chỉ destroy QoS/Queue bằng UUID khi không còn tham chiếu. Không dùng tên port thay UUID, không xóa toàn bộ QoS/Queue trên host.
+- Lệnh HTB tạo bản ghi mới mỗi lần chạy; cần quản lý bản ghi cũ để tránh tích tụ. Yêu cầu datapath hỗ trợ Linux HTB.
 
 ## System CVE Watch
 
@@ -84,6 +96,8 @@ Trang: https://ryanit-sys.github.io/sysadmin-cheatsheet/cve.html
 - Chạy local: `python3 scripts/update_cve.py`, sau đó `python3 -m http.server 8000`.
 
 ## Changelog
+
+- 2026-11-26: Bổ sung 10 mục Open vSwitch Rate Limit vào Networking, hỗ trợ tìm kiếm, copy, kiểm tra và rollback.
 
 - 2026-11-26: CVE Watch, dashboard ưu tiên service, phân loại hạ tầng, bổ sung thông tin phiên bản và advisory, lịch cập nhật hằng ngày.
 
