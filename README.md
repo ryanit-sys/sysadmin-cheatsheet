@@ -24,6 +24,7 @@ Kho tài liệu tra cứu nhanh câu lệnh Linux, System Administration, Networ
 | Docker | Container, image, network | Kế hoạch |
 | Kubernetes | Pod, deployment, service | Kế hoạch |
 | Services | Nginx, Apache, database | Kế hoạch |
+| CVE Watch | CVE hạ tầng, CVSS, KEV, advisory | Đã triển khai mã nguồn |
 
 ## Cách sử dụng
 
@@ -68,6 +69,27 @@ Thêm mục vào mảng `commands` trong `index.html`:
 ```
 
 Các trường lần lượt là nhóm công cụ, tiêu đề, câu lệnh và mô tả. Các tab dự phòng cần bổ sung dữ liệu và logic hiển thị khi triển khai nội dung mới.
+
+## System CVE Watch
+
+Trang: https://ryanit-sys.github.io/sysadmin-cheatsheet/cve.html
+
+- Ưu tiên OS/kernel, web/proxy, cloud/virtualization, storage/database, container/DevOps, network/security, mail/hosting.
+- Tên service nổi bật, thống kê Critical/High/KEV, tìm kiếm, lọc theo nhóm/service/mức độ, sắp xếp theo rủi ro hoặc ngày cập nhật.
+- Chi tiết CVE: mô tả gốc tiếng Anh, CVSS/vector, CPE và giới hạn phiên bản, ngày công bố/cập nhật, advisory và hành động CISA nếu có.
+- Nguồn NVD API 2.0 và CISA KEV. Phạm vi CVE được sửa đổi trong 14 ngày gần nhất, không phải toàn bộ CVE lịch sử.
+- Phân loại theo CPE và từ khóa trong mô tả; dấu (?) là kết quả từ khóa chưa xác nhận. Danh sách theo dõi không bao phủ mọi sản phẩm. CPE hiển thị dạng rút gọn, cần kiểm tra điều kiện đầy đủ tại NVD và advisory vendor.
+- GitHub Actions chạy lúc 00:00 UTC (07:00 ICT) mỗi ngày hoặc chạy thủ công. Dữ liệu quá 36 giờ được cảnh báo. Không cần API key; có retry và phân trang.
+- `scripts/update_cve.py`: collector và danh sách sản phẩm theo dõi; `data/cve.json`: dữ liệu sinh tự động; `cve.html`: giao diện; `.github/workflows/cve.yml`: lịch cập nhật.
+- Chạy local: `python3 scripts/update_cve.py`, sau đó `python3 -m http.server 8000`.
+
+## Changelog
+
+- 2026-11-26: CVE Watch, dashboard ưu tiên service, phân loại hạ tầng, bổ sung thông tin phiên bản và advisory, lịch cập nhật hằng ngày.
+
+## Quy trình bảo trì
+
+Mỗi thay đổi mã nguồn hoặc tính năng phải cập nhật README và changelog tương ứng, commit mô tả rõ ràng, kiểm tra workflow và deployment. Maintainer cho phép tự commit các cập nhật được yêu cầu, không cần xác nhận lại.
 
 ## Lưu ý
 
