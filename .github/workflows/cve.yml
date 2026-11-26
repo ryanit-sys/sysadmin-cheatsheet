@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - '.github/workflows/cve.yml'
+      - 'scripts/update_cve.py'
 permissions:
   contents: write
 concurrency:
@@ -17,37 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          python3 - <<'PY'
-          import json, urllib.request, urllib.parse, datetime, pathlib, time
-          def get(url):
-              for i in range(4):
-                  try:
-                      with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent':'SysAdmin-CVE-Watch'}), timeout=90) as r:
-                          return json.load(r)
-                  except Exception:
-                      if i == 3: raise
-                      time.sleep(15*(i+1))
-          now=datetime.datetime.now(datetime.timezone.utc)
-          kev={v['cveID'] for v in get('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json')['vulnerabilities']}
-          params={'pubStartDate':(now-datetime.timedelta(days=7)).isoformat(timespec='milliseconds'),'pubEndDate':now.isoformat(timespec='milliseconds'),'resultsPerPage':2000}
-          items=[]
-          start=0
-          while True:
-              params['startIndex']=start
-              d=get('https://services.nvd.nist.gov/rest/json/cves/2.0?'+urllib.parse.urlencode(params))
-              for v in d['vulnerabilities']:
-                  c=v['cve']
-                  metrics=c.get('metrics',{})
-                  m=next((metrics[k][0] for k in ('cvssMetricV40','cvssMetricV31','cvssMetricV30','cvssMetricV2') if metrics.get(k)),{})
-                  cv=m.get('cvssData',{})
-                  items.append({'id':c['id'],'description':next((x['value'] for x in c['descriptions'] if x['lang']=='en'),'No description'),'published':c['published'],'score':cv.get('baseScore'),'severity':cv.get('baseSeverity',m.get('baseSeverity','UNKNOWN')),'kev':c['id'] in kev})
-              start+=len(d['vulnerabilities'])
-              if start>=d['totalResults']: break
-              if not d['vulnerabilities']: raise RuntimeError('Incomplete NVD response')
-              time.sleep(6)
-          pathlib.Path('data').mkdir(exist_ok=True)
-          pathlib.Path('data/cve.json').write_text(json.dumps({'updated':now.isoformat(),'items':sorted(items,key=lambda x:x['published'],reverse=True)},ensure_ascii=False))
-          PY
+          python3 scripts/update_cve.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/cve.json
