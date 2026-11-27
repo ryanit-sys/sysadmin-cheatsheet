@@ -1,113 +1,115 @@
 # SysAdmin & DevOps Cheatsheet
 
-Kho tài liệu tra cứu nhanh câu lệnh Linux, System Administration, Networking và DevOps phục vụ vận hành hệ thống và troubleshooting hằng ngày.
+A quick-reference collection of Linux, system administration, networking, and DevOps commands for day-to-day infrastructure operations and troubleshooting.
 
 **Website:** https://ryanit-sys.github.io/sysadmin-cheatsheet/
 
-## Tính năng
+## Features
 
-- Tìm kiếm theo tên, nội dung và mô tả câu lệnh, hỗ trợ tiếng Việt không dấu.
-- Copy câu lệnh với một thao tác.
-- Phân loại theo công cụ, kèm giải thích và lưu ý thực tế.
-- Dark Mode, giao diện responsive cho desktop và mobile.
-- Static website, không cần backend hay thư viện bên ngoài.
+- Search by command name, content, or description, with accent-insensitive Vietnamese search.
+- Copy commands with a single click.
+- Browse commands by tool, with explanations and practical notes.
+- Dark mode and a responsive layout for desktop and mobile.
+- Static website with no backend or external library dependencies.
 
-## Danh mục
+## Categories
 
-| Danh mục | Nội dung | Trạng thái |
+| Category | Content | Status |
 | --- | --- | --- |
-| Search Commands | grep, find, awk, sed, cut, sort, uniq, xargs, journalctl | 30 câu lệnh |
-| Linux | System, process, storage, memory | Kế hoạch |
-| Networking | Open vSwitch QoS, HTB, ingress policing, kiểm tra và rollback | 10 câu lệnh |
-| Ceph | Cluster, OSD, PG, health | Kế hoạch |
-| Proxmox | VM, cluster, storage, SDN | Kế hoạch |
-| Docker | Container, image, network | Kế hoạch |
-| Kubernetes | Pod, deployment, service | Kế hoạch |
-| Services | Nginx, Apache, database | Kế hoạch |
-| CVE Watch | CVE hạ tầng, CVSS, KEV, advisory | Đã triển khai mã nguồn |
+| Search Commands | grep, find, awk, sed, cut, sort, uniq, xargs, journalctl | 30 commands |
+| Linux | System, processes, storage, memory | Planned |
+| Networking | Open vSwitch QoS, HTB, ingress policing, verification, and rollback | 10 entries |
+| Ceph | Cluster, OSD, PG, health | Planned |
+| Proxmox | VMs, cluster, storage, SDN | Planned |
+| Docker | Containers, images, networking | Planned |
+| Kubernetes | Pods, deployments, services | Planned |
+| Services | Nginx, Apache, databases | Planned |
+| CVE Watch | Infrastructure CVEs, CVSS, KEV, advisories | Implemented |
 
-## Cách sử dụng
+## Usage
 
-1. Truy cập website và chọn danh mục.
-2. Nhập từ khóa hoặc chọn nhóm công cụ.
-3. Đọc mô tả, nhấn **Copy** và điều chỉnh tham số trước khi chạy.
+1. Open the website and select a category.
+2. Enter a search keyword or select a tool group.
+3. Read the description, click **Copy**, and adjust the parameters before executing the command.
 
-Ví dụ: lọc tham số build Nginx chứa phiên bản module:
+Example: extract Nginx build arguments containing a specific module version:
 
-```bash
+~~~bash
 nginx -V 2>&1 | grep -oE '[^[:space:]]*0\.0\.20rc4[^[:space:]]*'
-```
+~~~
 
-## Kiến trúc và triển khai
+## Architecture and Deployment
 
-HTML, CSS và JavaScript thuần; dữ liệu và logic hiển thị hiện nằm trong `index.html`.
+The website uses plain HTML, CSS, and JavaScript. Command data and rendering logic are stored in index.html.
 
-```text
+~~~text
 sysadmin-cheatsheet/
 ├── index.html
+├── cve.html
+├── data/
+│   └── cve.json
+├── scripts/
+│   └── update_cve.py
+├── .github/
+│   └── workflows/
+│       └── cve.yml
 └── README.md
-```
+~~~
 
-Chạy thử local:
+Run locally:
 
-```bash
+~~~bash
 git clone https://github.com/ryanit-sys/sysadmin-cheatsheet.git
 cd sysadmin-cheatsheet
 python3 -m http.server 8000
-```
+~~~
 
-Truy cập http://localhost:8000.
+Open http://localhost:8000.
 
-GitHub Pages: **Settings → Pages → Deploy from a branch → main → / (root)**. Theo dõi deployment tại tab Actions.
+For GitHub Pages deployment, navigate to **Settings → Pages → Deploy from a branch**, select **main** and **/ (root)**. Monitor deployment status in the Actions tab.
 
-## Bổ sung câu lệnh
+## Adding Commands
 
-Thêm mục vào mảng `commands` trong `index.html`:
+Add an entry to the commands array in index.html:
 
-```javascript
-["grep", "Tìm lỗi trong log", "grep -in 'error' application.log", "Hiển thị số dòng, không phân biệt hoa thường."]
-```
+~~~javascript
+["grep", "Find errors in logs", "grep -in 'error' application.log", "Show line numbers and ignore case."]
+~~~
 
-Các trường lần lượt là nhóm công cụ, tiêu đề, câu lệnh và mô tả. Networking sử dụng mảng `networkingCommands` cùng cấu trúc. Các tab dự phòng cần bổ sung dữ liệu và logic hiển thị khi triển khai nội dung mới.
+The fields represent the tool group, title, command, and description, respectively. The Networking category uses the networkingCommands array with the same structure. Placeholder tabs require additional data and rendering logic when new content is introduced.
 
-## Open vSwitch Rate Limit
+## Open vSwitch Rate Limiting
 
-Tab **Networking → Open vSwitch** có 10 mục cấu hình, kiểm tra và rollback.
+The **Networking → Open vSwitch** section contains 10 entries covering configuration, verification, and rollback.
 
-- Egress: Linux HTB QoS/Queue, 40 Mbps = 40000000 bit/s.
-- Ingress: policing, 40 Mbps = 40000 kbit/s; burst ví dụ 4000 kbit. Policing drop gói vượt ngưỡng, khác với shaping.
-- Chiều traffic được xác định theo port/interface OVS, không mặc định theo chiều upload/download của VM.
-- Kiểm tra bằng ovs-vsctl, ovs-appctl, tc và iperf3 hai chiều.
-- Port fwln9990o0 là ví dụ; thay bằng port thực tế. Kiểm tra QoS hiện hữu trước khi ghi đè.
-- Rollback: tắt policing, lưu UUID, clear Port qos, chỉ destroy QoS/Queue bằng UUID khi không còn tham chiếu. Không dùng tên port thay UUID, không xóa toàn bộ QoS/Queue trên host.
-- Lệnh HTB tạo bản ghi mới mỗi lần chạy; cần quản lý bản ghi cũ để tránh tích tụ. Yêu cầu datapath hỗ trợ Linux HTB.
+- Egress: Linux HTB QoS/Queue; 40 Mbps = 40,000,000 bit/s.
+- Ingress: policing; 40 Mbps = 40,000 kbit/s, with an example burst of 4,000 kbit. Unlike shaping, policing drops packets that exceed the configured limits.
+- Traffic direction is relative to the OVS port/interface, not necessarily the VM's upload or download direction.
+- Verify configuration using ovs-vsctl, ovs-appctl, tc, and bidirectional iperf3 tests.
+- Replace the example port fwln9990o0 with the actual port. Inspect existing QoS before overwriting it.
+- Rollback: disable policing, record UUIDs, clear the Port qos reference, and destroy QoS/Queue records by UUID only after confirming they are no longer referenced. Do not substitute a port name for a UUID or delete all QoS/Queue records on the host.
+- The HTB creation command creates new records each time it runs. Manage obsolete records to avoid accumulation. A datapath supporting Linux HTB is required.
 
 ## System CVE Watch
 
-Trang: https://ryanit-sys.github.io/sysadmin-cheatsheet/cve.html
+**Dashboard:** https://ryanit-sys.github.io/sysadmin-cheatsheet/cve.html
 
-- Ưu tiên OS/kernel, web/proxy, cloud/virtualization, storage/database, container/DevOps, network/security, mail/hosting.
-- Tên service nổi bật, thống kê Critical/High/KEV, tìm kiếm, lọc theo nhóm/service/mức độ, sắp xếp theo rủi ro hoặc ngày cập nhật.
-- Chi tiết CVE: mô tả gốc tiếng Anh, CVSS/vector, CPE và giới hạn phiên bản, ngày công bố/cập nhật, advisory và hành động CISA nếu có.
-- Nguồn NVD API 2.0 và CISA KEV. Phạm vi CVE được sửa đổi trong 14 ngày gần nhất, không phải toàn bộ CVE lịch sử.
-- Phân loại theo CPE và từ khóa trong mô tả; dấu (?) là kết quả từ khóa chưa xác nhận. Danh sách theo dõi không bao phủ mọi sản phẩm. CPE hiển thị dạng rút gọn, cần kiểm tra điều kiện đầy đủ tại NVD và advisory vendor.
-- GitHub Actions chạy lúc 00:00 UTC (07:00 ICT) mỗi ngày hoặc chạy thủ công. Dữ liệu quá 36 giờ được cảnh báo. Không cần API key; có retry và phân trang.
-- `scripts/update_cve.py`: collector và danh sách sản phẩm theo dõi; `data/cve.json`: dữ liệu sinh tự động; `cve.html`: giao diện; `.github/workflows/cve.yml`: lịch cập nhật.
-- Chạy local: `python3 scripts/update_cve.py`, sau đó `python3 -m http.server 8000`.
+- Focuses on operating systems and kernels, web servers and proxies, cloud and virtualization, storage and databases, containers and DevOps, networking and security, and mail and hosting.
+- Highlights service names, Critical/High/KEV statistics, search, category/service/severity filters, and sorting by risk or update date.
+- CVE details include original English descriptions, CVSS scores and vectors, CPE and version constraints, publication and modification dates, advisories, and CISA required actions where available.
+- Data sources: NVD API 2.0 and CISA KEV. Coverage is limited to CVEs modified within the last 14 days, not the complete historical CVE database.
+- Classification uses CPE and description keywords. A question mark (?) indicates an unconfirmed keyword match. The watchlist does not cover every product. CPE information is abbreviated; consult NVD and vendor advisories for complete applicability conditions.
+- GitHub Actions runs daily at 00:00 UTC (07:00 ICT) and supports manual execution. Data older than 36 hours triggers a warning. No API key is required; retries and pagination are supported.
+- scripts/update_cve.py: collector and product watchlist; data/cve.json: generated data; cve.html: dashboard; .github/workflows/cve.yml: scheduled updates.
+- To run locally, execute python3 scripts/update_cve.py, then python3 -m http.server 8000.
 
-## Changelog
+## Maintenance
 
-- 2026-11-26: Bổ sung 10 mục Open vSwitch Rate Limit vào Networking, hỗ trợ tìm kiếm, copy, kiểm tra và rollback.
+Keep the README aligned with code and feature changes. Use descriptive commit messages, test changes before committing, and verify workflows and deployment. The maintainer authorizes direct commits for requested updates without additional confirmation.
 
-- 2026-11-26: CVE Watch, dashboard ưu tiên service, phân loại hạ tầng, bổ sung thông tin phiên bản và advisory, lịch cập nhật hằng ngày.
+## Important Notes
 
-## Quy trình bảo trì
-
-Mỗi thay đổi mã nguồn hoặc tính năng phải cập nhật README và changelog tương ứng, commit mô tả rõ ràng, kiểm tra workflow và deployment. Maintainer cho phép tự commit các cập nhật được yêu cầu, không cần xác nhận lại.
-
-## Lưu ý
-
-Ví dụ chủ yếu dành cho GNU/Linux. Kiểm tra quyền, phiên bản công cụ, đường dẫn và tham số trước khi chạy trên production. Không đưa mật khẩu, token hoặc thông tin nội bộ lên repository public.
+Examples primarily target GNU/Linux. Verify permissions, tool versions, paths, and parameters before running commands in production. Never publish passwords, tokens, or internal infrastructure information in this public repository.
 
 ## Maintainer
 
